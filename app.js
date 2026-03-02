@@ -6,7 +6,7 @@ async function run() {
   output.innerText = "Loading...";
 
   try {
-    const res = await fetch("https://request-function-eedjehbjbngpa8ha.eastus2-01.azurewebsites.net/api/hipaa_check?code=Wmaumz_1yIvt0DiR37hfCErtNIwzyLhXlVJPPpg5SenMAzFuVZVMPQ==", {
+    const res = await fetch("https://request-function-eedjehbjbngpa8ha.eastus2-01.azurewebsites.net/api/hipaa_check?code=Wmaumz_1yIvt0DiR37hfCErtNIwzyLhXlVJPPpg5SenMAzFuVZVMPQ==?debug=1", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
