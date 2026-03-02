@@ -1,23 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>HIPAA Checker</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+<h2>HIPAA Compliance Test</h2>
 
-  <h2>HIPAA Compliance Test</h2>
-
-  <textarea id="input" rows="10" cols="60">
+<h4>Manual Text Input</h4>
+<textarea id="input" rows="10" cols="60">
 Patient Name: John Doe. DOB: 01/01/1990. Signed authorization present.
-  </textarea>
+</textarea>
 
-  <br><br>
-  <button onclick="run()">Run Check</button>
+<br><br>
+<button onclick="run()">Run Text Check</button>
 
-  <h3>Response</h3>
-  <pre id="output"></pre>
+<hr>
 
-  <script src="app.js"></script>
-</body>
-</html>
+<h4>Upload File (.txt for now)</h4>
+<input type="file" id="fileInput" />
+<br><br>
+<button onclick="uploadFile()">Run File Check</button>
+
+<h3>Response</h3>
+<pre id="output"></pre>
