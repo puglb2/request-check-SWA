@@ -1,3 +1,4 @@
+//https://request-function-eedjehbjbngpa8ha.eastus2-01.azurewebsites.net/api/hipaa_check?code=Wmaumz_1yIvt0DiR37hfCErtNIwzyLhXlVJPPpg5SenMAzFuVZVMPQ==
 async function run() {
   const output = document.getElementById("output");
   const text = document.getElementById("input").value;
@@ -5,7 +6,7 @@ async function run() {
   output.innerText = "Loading...";
 
   try {
-    const res = await fetch("/api/hipaa_check?debug=1", {
+    const res = await fetch("https://request-function-eedjehbjbngpa8ha.eastus2-01.azurewebsites.net/api/hipaa_check?code=Wmaumz_1yIvt0DiR37hfCErtNIwzyLhXlVJPPpg5SenMAzFuVZVMPQ==", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
