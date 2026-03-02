@@ -1,0 +1,19 @@
+body {
+  font-family: Arial;
+  padding: 20px;
+}
+
+textarea {
+  width: 100%;
+}
+
+button {
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+pre {
+  background: #f4f4f4;
+  padding: 10px;
+  white-space: pre-wrap;
+}
