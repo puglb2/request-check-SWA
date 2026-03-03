@@ -94,14 +94,28 @@ async function handleResponse(res) {
 ========================= */
 
 function renderResult(data) {
-  if (!data || data.error) {
+  if (!data) {
+    return "No data returned.";
+  }
+
+  // Debug OCR preview mode
+  if (data.ocr_preview) {
+    return (
+      "OCR Length: " + data.ocr_length + "\n\n" +
+      "OCR Preview:\n\n" +
+      data.ocr_preview
+    );
+  }
+
+  // Normal compliance mode
+  if (!data.compliance_score) {
     return JSON.stringify(data, null, 2);
   }
 
   let text = "";
 
   text += "Compliance Score: " + data.compliance_score + "%\n";
-  text += "Risk Level: " + data.risk_level.toUpperCase() + "\n\n";
+  text += "Risk Level: " + (data.risk_level || "").toUpperCase() + "\n\n";
 
   if (data.missing_items && data.missing_items.length) {
     text += "Missing Items:\n";
@@ -113,12 +127,14 @@ function renderResult(data) {
 
   text += "Detailed Results:\n";
 
-  data.results.forEach(r => {
-    text += "----------------------------------\n";
-    text += "ID: " + r.id + "\n";
-    text += "Status: " + r.status.toUpperCase() + "\n";
-    text += "Evidence: " + r.evidence + "\n\n";
-  });
+  if (data.results) {
+    data.results.forEach(r => {
+      text += "----------------------------------\n";
+      text += "ID: " + r.id + "\n";
+      text += "Status: " + r.status + "\n";
+      text += "Evidence: " + r.evidence + "\n\n";
+    });
+  }
 
   return text;
 }
