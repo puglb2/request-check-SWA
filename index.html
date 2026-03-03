@@ -1,14 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>HIPAA Checker</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
 <body>
 
-<button onclick="test()">Test</button>
+  <h2>HIPAA Compliance Test</h2>
 
-<script>
-function test() {
-  alert("JS is working");
-}
-</script>
+  <!-- TEXT INPUT -->
+  <h4>Manual Text Input</h4>
+  <textarea id="input" rows="10" cols="60">
+Patient Name: John Doe. DOB: 01/01/1990. Signed authorization present.
+  </textarea>
+
+  <br><br>
+  <button id="runBtn">Run Text Check</button>
+
+  <hr>
+
+  <!-- FILE UPLOAD -->
+  <h4>Upload File (.txt)</h4>
+  <input type="file" id="fileInput" />
+  <br><br>
+  <button id="uploadBtn">Run File Check</button>
+
+  <h3>Response</h3>
+  <pre id="output"></pre>
+
+  <!-- LOAD JS LAST -->
+  <script src="/app.js"></script>
+
+  <!-- Attach handlers AFTER JS loads -->
+  <script>
+    document.getElementById("runBtn").addEventListener("click", run);
+    document.getElementById("uploadBtn").addEventListener("click", uploadFile);
+  </script>
 
 </body>
 </html>
