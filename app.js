@@ -16,13 +16,25 @@ async function run() {
       }
     );
 
-    const data = await res.json();
-    output.innerText = JSON.stringify(data, null, 2);
+    const text = await res.text();
 
-  } catch (err) {
-    output.innerText = "ERROR:\n" + err.message;
-  }
-}
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = text;
+    }
+
+    output.innerText =
+      "Status: " + res.status + "\n\n" +
+      (typeof data === "string"
+        ? data
+        : JSON.stringify(data, null, 2));
+
+      } catch (err) {
+        output.innerText = "ERROR:\n" + err.message;
+      }
+    }
 
 
 async function uploadFile() {
