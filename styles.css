@@ -1,19 +1,30 @@
 body {
-  font-family: Arial;
-  padding: 20px;
+  font-family: Arial, sans-serif;
+  margin: 24px;
 }
 
-textarea {
-  width: 100%;
+.card {
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.row {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
 }
 
 button {
-  padding: 10px 20px;
+  padding: 10px 14px;
   cursor: pointer;
 }
 
 pre {
-  background: #f4f4f4;
-  padding: 10px;
   white-space: pre-wrap;
+  background: #f7f7f7;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #eee;
 }
