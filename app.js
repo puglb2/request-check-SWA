@@ -1,140 +1,133 @@
 //https://request-function-eedjehbjbngpa8ha.eastus2-01.azurewebsites.net/api/hipaa_check?code=Wmaumz_1yIvt0DiR37hfCErtNIwzyLhXlVJPPpg5SenMAzFuVZVMPQ==
-const API_URL =
+// ✅ Set these two endpoints (Function key included)
+const HIPAA_URL =
   "https://request-function-eedjehbjbngpa8ha.eastus2-01.azurewebsites.net/api/hipaa_check?code=Wmaumz_1yIvt0DiR37hfCErtNIwzyLhXlVJPPpg5SenMAzFuVZVMPQ==&debug=1";
 
+const EXTRACT_URL =
+  "https://request-function-eedjehbjbngpa8ha.eastus2-01.azurewebsites.net/api/extract_order?code=Wmaumz_1yIvt0DiR37hfCErtNIwzyLhXlVJPPpg5SenMAzFuVZVMPQ==&debug=1";
 
-/* =========================
-   TEXT CHECK
-========================= */
 
-async function run() {
-  const output = document.getElementById("output");
-  const textInput = document.getElementById("input").value;
+function getFileOrThrow() {
+  const out = document.getElementById("output");
+  const input = document.getElementById("fileInput");
 
-  output.innerText = "Loading...";
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ocr_text: textInput })
-    });
-
-    handleResponse(res);
-
-  } catch (err) {
-    output.innerText = "ERROR:\n" + err.message;
+  if (!input.files.length) {
+    out.innerText = "Select a PDF first.";
+    throw new Error("No file selected");
   }
+
+  return input.files[0];
 }
 
-
-/* =========================
-   FILE CHECK
-========================= */
-
-async function uploadFile() {
-  const output = document.getElementById("output");
-  const fileInput = document.getElementById("fileInput");
-
-  if (!fileInput.files.length) {
-    output.innerText = "Please select a file.";
-    return;
-  }
-
+async function postFile(url, file) {
   const formData = new FormData();
-  formData.append("file", fileInput.files[0]);
+  formData.append("file", file);
 
-  output.innerText = "Uploading...";
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      body: formData
-    });
-
-    handleResponse(res);
-
-  } catch (err) {
-    output.innerText = "ERROR:\n" + err.message;
-  }
-}
-
-
-/* =========================
-   RESPONSE HANDLING
-========================= */
-
-async function handleResponse(res) {
-  const output = document.getElementById("output");
-
-  const rawText = await res.text();
+  const res = await fetch(url, { method: "POST", body: formData });
+  const raw = await res.text();
 
   let data;
-  try {
-    data = JSON.parse(rawText);
-  } catch {
-    output.innerText =
-      "Status: " + res.status + "\n\n" + rawText;
-    return;
-  }
+  try { data = JSON.parse(raw); }
+  catch { data = raw; }
 
-  if (!res.ok) {
-    output.innerText =
-      "Status: " + res.status + "\n\n" +
-      JSON.stringify(data, null, 2);
-    return;
-  }
-
-  output.innerText = renderResult(data);
+  return { res, data };
 }
 
+function pretty(data) {
+  if (typeof data === "string") return data;
+  return JSON.stringify(data, null, 2);
+}
 
-/* =========================
-   FORMATTED OUTPUT
-========================= */
+function renderHipaa(data) {
+  if (!data || typeof data !== "object") return pretty(data);
 
-function renderResult(data) {
-  if (!data) {
-    return "No data returned.";
+  let s = "";
+  s += `Order Type: ${data.order_type}\n`;
+  s += `Doc Kind: ${data.doc_kind}\n`;
+  s += `Signature: ${data.signature?.signature_type || "unknown"} (${data.signature?.confidence || "low"})\n\n`;
+  s += `Compliance Score: ${data.compliance_score}%\n`;
+  s += `Risk: ${(data.risk_level || "").toUpperCase()}\n\n`;
+
+  if (data.missing_items?.length) {
+    s += "Missing:\n";
+    data.missing_items.forEach(x => s += `  - ${x}\n`);
+    s += "\n";
   }
 
-  // Debug OCR preview mode
-  if (data.ocr_preview) {
-    return (
-      "OCR Length: " + data.ocr_length + "\n\n" +
-      "OCR Preview:\n\n" +
-      data.ocr_preview
-    );
-  }
-
-  // Normal compliance mode
-  if (!data.compliance_score) {
-    return JSON.stringify(data, null, 2);
-  }
-
-  let text = "";
-
-  text += "Compliance Score: " + data.compliance_score + "%\n";
-  text += "Risk Level: " + (data.risk_level || "").toUpperCase() + "\n\n";
-
-  if (data.missing_items && data.missing_items.length) {
-    text += "Missing Items:\n";
-    data.missing_items.forEach(id => {
-      text += "  - " + id + "\n";
-    });
-    text += "\n";
-  }
-
-  text += "Detailed Results:\n";
-
-  if (data.results) {
+  if (data.results?.length) {
+    s += "Results:\n";
     data.results.forEach(r => {
-      text += "----------------------------------\n";
-      text += "ID: " + r.id + "\n";
-      text += "Status: " + r.status + "\n";
-      text += "Evidence: " + r.evidence + "\n\n";
+      s += `--- ${r.id} | ${r.status}\n`;
+      if (r.evidence) s += `    evidence: ${r.evidence}\n`;
     });
+    s += "\n";
   }
 
-  return text;
+  return s;
+}
+
+function renderExtract(data) {
+  if (!data || typeof data !== "object") return pretty(data);
+
+  let s = "";
+  s += `External ID: ${data.external_id}\n`;
+  s += `Order Type: ${data.order_type}\n`;
+  s += `DOS: ${data.dos}\n`;
+  s += `Patient Name: ${data.patient_name}\n`;
+  s += `DOB: ${data.dob}\n`;
+  s += `Pick Up Provider: ${data.pickup_provider}\n\n`;
+
+  s += "Evidence:\n";
+  const ev = data.evidence || {};
+  Object.keys(ev).forEach(k => {
+    if (ev[k]) s += `  - ${k}: ${ev[k]}\n`;
+  });
+
+  if (data.timing_ms) {
+    s += `\nTiming (ms): ${JSON.stringify(data.timing_ms)}\n`;
+  }
+
+  return s;
+}
+
+async function extractOrder() {
+  const out = document.getElementById("output");
+  out.innerText = "Extracting order data...";
+
+  try {
+    const file = getFileOrThrow();
+    const { res, data } = await postFile(EXTRACT_URL, file);
+
+    if (!res.ok) {
+      out.innerText = `Status: ${res.status}\n\n${pretty(data)}`;
+      return;
+    }
+
+    out.innerText = renderExtract(data);
+
+  } catch (e) {
+    out.innerText = `ERROR:\n${e.message}`;
+  }
+}
+
+async function runHipaa(reviewer) {
+  const out = document.getElementById("output");
+  out.innerText = `Running HIPAA Checklist ${reviewer}...`;
+
+  try {
+    const file = getFileOrThrow();
+    const url = HIPAA_URL + `&reviewer=${reviewer}`;
+
+    const { res, data } = await postFile(url, file);
+
+    if (!res.ok) {
+      out.innerText = `Status: ${res.status}\n\n${pretty(data)}`;
+      return;
+    }
+
+    out.innerText = renderHipaa(data);
+
+  } catch (e) {
+    out.innerText = `ERROR:\n${e.message}`;
+  }
 }
